@@ -3,13 +3,14 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>页面标题</title>
+    <title>Week1 Attempt</title>
     <script id="vertex-shader" type="x-shader/x-vertex">
         attribute vec4 vPosition;
         
         void main()
         {
             gl_Position = vPosition;
+            gl_PointSize = 2.0;
         }
     </script>
 
@@ -31,6 +32,9 @@
         var interval;
         var time = 0;
         var ground;
+        var points = [];
+        var vertices = [];
+        var isOK = true;
 
         window.onload = function init() {
             var canvas = document.getElementById("gl-canvas");
@@ -38,12 +42,45 @@
             gl = WebGLUtils.setupWebGL(canvas);
             if (!gl) { alert("WebGL isn't available"); }
 
+            for (var i = 0; i < 360; i += 1) {
+                var x = 80 * Math.cos(i * Math.PI / 180);
+                var y = 180 + 80 * Math.sin(i * Math.PI / 180);
+                points.push(vec2(x / 512.0, y / 512.0));
+            }
+
+            for (var i = 0; i < 360; i += 1) {
+                var x = -60 + 30 * Math.cos(i * Math.PI / 180);
+                var y = -160 + 80 * Math.sin(i * Math.PI / 180);
+                points.push(vec2(x / 512.0, y / 512.0));
+                x = 60 + 30 * Math.cos(i * Math.PI / 180);
+                points.push(vec2(x / 512.0, y / 512.0));
+            }
+
+            for (var i = 0; i < 360; i += 1) {
+                var x = 100 * Math.cos(i * Math.PI / 180);
+                var y = 140 * Math.sin(i * Math.PI / 180);
+                points.push(vec2(x / 512.0, y / 512.0));
+            }
+
+            for (var i = 0; i < 360; i += 1) {
+                var x = -120 + 80 * Math.cos(i * Math.PI / 180);
+                var y = 80 + 30 * Math.sin(i * Math.PI / 180);
+                points.push(vec2(x / 512.0, y / 512.0));
+                x = 120 + 80 * Math.cos(i * Math.PI / 180);
+                points.push(vec2(x / 512.0, y / 512.0));
+            }
+
+            for (var i = 0; i < 360; i += 1) {
+                var x = -80 + 30 * Math.cos(i * Math.PI / 180);
+                var y = 250 + 30 * Math.sin(i * Math.PI / 180);
+                points.push(vec2(x / 512.0, y / 512.0));
+                x = 80 + 30 * Math.cos(i * Math.PI / 180);
+                points.push(vec2(x / 512.0, y / 512.0));
+            }
             //
             //  Configure WebGL
-            //
-            //    gl.viewport( 0, 0, canvas.width, canvas.height );
-            gl.viewport(0, 0, 256, 256);
-            gl.clearColor(0.0, 0.0, 0.0, 1.0);
+            gl.viewport(0, 0, canvas.width, canvas.height);
+            gl.clearColor(1.0, 1.0, 1.0, 1.0);
 
             //  Load shaders and initialize attribute buffers
 
@@ -66,48 +103,52 @@
 
 
         function render() {
-            // Four Vertices
+            vertices = [];
 
-            var vertices = [
-                add(centre, vec2(-0.5, -0.5)),
-                add(centre, vec2(-0.5, 0.5)),
-                add(centre, vec2(0.5, 0.5)),
-                add(centre, vec2(0.5, -0.5))
-            ];
+            points.forEach(function (value, index) {
+                vertices.push(add(value, centre));
+            });
 
             gl.bufferData(gl.ARRAY_BUFFER, flatten(vertices), gl.STATIC_DRAW);
 
+            document.getElementById("xButton").onclick = function () {
+                isOK = true;
+            };
+
+            document.getElementById("yButton").onclick = function () {
+                isOK = false;
+            };
+
+            document.getElementById("zButton").onclick = function () {
+                centre = vec2(0, 0);
+                render();
+            };
 
             gl.clear(gl.COLOR_BUFFER_BIT);
-            gl.drawArrays(gl.TRIANGLE_FAN, 0, 4);
+            gl.drawArrays(gl.points, 0, points.length);
         }
 
-        // canvas.addEventListener("click", function () {
-        //     gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-        //     var t = vec2(-1 + 2 * event.clientX / canvas.width,
-        //                 -1 + 2 * (canvas.height - event.clientY) / canvas.height);
-        //     gl.bufferSubData(gl.ARRAY_BUFFER, sizeof['vec2'] * index, t);
-        //     index++;
-        // });
         window.addEventListener("keydown", function () {
-            switch (event.keyCode) {
-                case 37: // Left
-                    centre = add(centre, vec2(-0.01, 0));
-                    break;
-                case 38: // Up
-                    centre = add(centre, vec2(0, 0.01));
-                    break;
-                case 39: // Right
-                    centre = add(centre, vec2(0.01, 0));
-                    break;
-                case 40: // Down
-                    centre = add(centre, vec2(0, -0.01));
-                    break;
-                case 32: // Spacebar
-                    ground = centre;
-                    interval = setTimeout(jump(ground), 10); // 10ms
-                default:
-                    break;
+            if (isOK == true) {
+                switch (event.keyCode) {
+                    case 37: // Left
+                        centre = add(centre, vec2(-0.01, 0));
+                        break;
+                    case 38: // Up
+                        centre = add(centre, vec2(0, 0.01));
+                        break;
+                    case 39: // Right
+                        centre = add(centre, vec2(0.01, 0));
+                        break;
+                    case 40: // Down
+                        centre = add(centre, vec2(0, -0.01));
+                        break;
+                    case 32: // Spacebar
+                        ground = centre;
+                        interval = setTimeout(jump(ground), 10); // 10ms
+                    default:
+                        break;
+                }
             }
             render();
         });
@@ -136,9 +177,11 @@ D、	实现菜单功能
  -->
 
 <body>
-    <canvas id="gl-canvas" width="512" height="256">
+    <canvas id="gl-canvas" width="512" height="512"></canvas>
+    <br />
+    <button id="xButton">START</button>
+    <button id="yButton">STOP</button>
+    <button id="zButton">RESET</button>
 </body>
-
-
 
 </html>
