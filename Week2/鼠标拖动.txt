@@ -1,0 +1,53 @@
+var drag=true;
+var flapbool = 0;
+var flap = 0;
+
+//动物颜色1和动物颜色2分别改为绘制图像时所用的两种颜色
+
+function isavailable(x,y)
+{
+  if(gl.ReadPixels(x,y,0.01,0.01,GL_COLOR_INDEX)==动物颜色1||gl.ReadPixels(x,y,0.01,0.01,GL_COLOR_INDEX)==动物颜色2)
+  {
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}//是否可以拖动
+
+anvas.addEventListener("mousedown",function(event)
+{
+  var preclickX = 2*event.offsetX/canvas.width-1;
+  var preclickY = 1-2*event.offsetY/canvas.height;
+  if(isavailable(preclickX-width,(preclickY-height)*heightRevers))
+  {  drag = true;  }
+  else {  drag=false;  }
+});//鼠标事件
+
+anvas.addEventListener("mousemove",function(event)
+{
+  if(drag)
+  {
+    if(!flapBool)
+    {
+      wings = setInterval(function(){flap++;},100);
+    }
+    flapBool = 1;
+      event.preventDefault();
+      var clickX = 2*event.offsetX/canvas.width-1;
+      var clickY = 1-2*event.offsetY/canvas.height;
+      width + = clickX-preclickX;
+      height + = (clickY-preclickY)*heightReverse;
+      centre = add(centre,vec2(width,height));
+      render();
+  }
+});//鼠标移动事件
+
+canvaas.addEventListener("mouseup",function(event)
+{
+  clearInterval(wings);
+  drag = false;
+  flapBool = 0;
+  flap = 0;
+});//鼠标松开
