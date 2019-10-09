@@ -309,7 +309,7 @@ D、	实现菜单功能
         });//鼠标事件
 
         canvas.addEventListener("mousemove", function () {
-            if (drag && mouse_is_down) {
+            if (drag && mouse_is_down && isOK) {
                 if (!flapBool) {
                     interval = setInterval(function () { flap++; }, 100);
                 }
@@ -343,7 +343,7 @@ D、	实现菜单功能
             //     || pixels == vec3(0.0, 0, 0))
             var found = false;
             for(var i = 0; i < points.length; i++){
-                if (Math.abs(x - points[i][0]) < 0.1 && Math.abs(y - points[i][1]) < 0.1) {
+                if (Math.abs(x - Tx - points[i][0]) < 0.05 && Math.abs(y - Ty - points[i][1]) < 0.05) {
                     found = true;
                     break;
                 }
