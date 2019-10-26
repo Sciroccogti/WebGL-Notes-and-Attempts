@@ -75,16 +75,16 @@
 				// manager.addHandler( /\.tga$/i, new TGALoader() );
 
 				new MTLLoader( manager )
-					.setPath( 'Nala/' )
-					.load( 'Nala.mtl', function ( materials ) {
+					.setPath( 'cat/' )
+					.load( '0.mtl', function ( materials ) {
 
 						materials.preload();
 
 						new OBJLoader( manager )
 							.setMaterials( materials )
-							.setPath( 'Nala/' )
-							.load( 'Nala.obj', function ( object ) {
-
+							.setPath( 'cat/' )
+							.load( '0.obj', function ( object ) {
+								object.scale.set(.2,.2,.2);
 								object.position.y = - 95;
 								scene.add( object );
 
