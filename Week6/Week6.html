@@ -1,152 +1,199 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<title>three.js webgl - OBJLoader + MTLLoader</title>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
-		<link type="text/css" rel="stylesheet" href="main.css">
-	</head>
 
-	<body>
-		<div id="info">
+<head>
+	<title>three.js webgl - OBJLoader + MTLLoader</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	<link type="text/css" rel="stylesheet" href="main.css">
+
+	<script id="vertex-shader" type="x-shader/x-vertex">
+			attribute vec4 vPosition;
+			attribute vec3 vColor;
+			uniform vec4 translation; // 用于平移
+			varying vec4 color;
+	
+			void main()
+			{
+				gl_Position = vPosition + translation;
+				color = vec4(vColor, 1.0);
+				gl_PointSize = 1.0;
+			}
+		</script>
+
+</head>
+
+<!-- 将动物拓展为三维物体（建议由STL、OBJ等模型导入）。
+		自由设计交互方式，利用变换实现动物在三维空间中的运动：
+	A、	实现基于物体坐标系的运动，即动物头部方向为前进，相反方向为后退，绕动物中轴线的转向、俯仰和翻滚；
+	B、	实现以屏幕坐标为参考的运动，即上、下、左、右移动，和绕屏幕坐标轴的旋转。
+	C、	利用虚拟跟踪球技术，实现鼠标交互操作旋转查看对象。 -->
+
+<body>
+	<!-- <div id="info">
 		<a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> - OBJLoader + MTLLoader
-		</div>
+		</div> -->
 
-		<script type="module">
+	<script type="module">
 
-			import * as THREE from '../threejs/three.module.js';
+		import * as THREE from '../threejs/three.module.js';
 
-			import { DDSLoader } from '../threejs/DDSLoader.js';
-			import { MTLLoader } from '../threejs/MTLLoader.js';
-			import { OBJLoader } from '../threejs/OBJLoader.js';
+		// import { TGALoader } from '../threejs/TGALoader.js';
+		import { MTLLoader } from '../threejs/MTLLoader.js';
+		import { OBJLoader } from '../threejs/OBJLoader.js';
+		import { TrackballControls } from '../threejs/TrackballControls.js';
+		var container;
 
-			var container;
+		var camera, controls, scene, renderer;
+		var phoenix;
 
-			var camera, scene, renderer;
+		var mouseX = 0, mouseY = 0;
 
-			var mouseX = 0, mouseY = 0;
-
-			var windowHalfX = window.innerWidth / 2;
-			var windowHalfY = window.innerHeight / 2;
-
-
-			init();
-			animate();
+		var windowHalfX = window.innerWidth / 2;
+		var windowHalfY = window.innerHeight / 2;
 
 
-			function init() {
+		init();
+		animate();
 
-				container = document.createElement( 'div' );
-				document.body.appendChild( container );
 
-				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 2000 );
-				camera.position.z = 250;
+		function init() {
 
-				// scene
+			container = document.createElement('div');
+			document.body.appendChild(container);
 
-				scene = new THREE.Scene();
+			camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 1, 2000);
+			camera.position.z = 250;
 
-				var ambientLight = new THREE.AmbientLight( 0xcccccc, 0.4 );
-				scene.add( ambientLight );
+			// scene
 
-				var pointLight = new THREE.PointLight( 0xffffff, 0.8 );
-				camera.add( pointLight );
-				scene.add( camera );
+			scene = new THREE.Scene();
+			scene.background = new THREE.Color(0xcccccc);
+			scene.fog = new THREE.FogExp2(0xcccccc, 0.002);
 
-				// model
+			var ambientLight = new THREE.AmbientLight(0xcccccc, 0.4);
+			scene.add(ambientLight);
 
-				var onProgress = function ( xhr ) {
+			var pointLight = new THREE.PointLight(0xffffff, 0.8);
+			camera.add(pointLight);
+			scene.add(camera);
 
-					if ( xhr.lengthComputable ) {
+			// model
 
-						var percentComplete = xhr.loaded / xhr.total * 100;
-						console.log( Math.round( percentComplete, 2 ) + '% downloaded' );
+			var onProgress = function (xhr) {
 
-					}
+				if (xhr.lengthComputable) {
 
-				};
+					var percentComplete = xhr.loaded / xhr.total * 100;
+					console.log(Math.round(percentComplete, 2) + '% downloaded');
 
-				var onError = function () { };
+				}
 
-				var manager = new THREE.LoadingManager();
-				manager.addHandler( /\.dds$/i, new DDSLoader() );
+			};
 
-				// comment in the following line and import TGALoader if your asset uses TGA textures
-				// manager.addHandler( /\.tga$/i, new TGALoader() );
+			var onError = function () { };
 
-				new MTLLoader( manager )
-					.setPath( 'cat/' )
-					.load( '0.mtl', function ( materials ) {
+			var manager = new THREE.LoadingManager();
+			// manager.addHandler(/\.dds$/i, new DDSLoader());
 
-						materials.preload();
+			// comment in the following line and import TGALoader if your asset uses TGA textures
+			// manager.addHandler( /\.tga$/i, new TGALoader() );
 
-						new OBJLoader( manager )
-							.setMaterials( materials )
-							.setPath( 'cat/' )
-							.load( '0.obj', function ( object ) {
-								object.scale.set(.2,.2,.2);
-								object.position.y = - 95;
-								scene.add( object );
+			new MTLLoader(manager)
+				.setPath('cat/')
+				.load('0.mtl', function (materials) {
 
-							}, onProgress, onError );
+					materials.preload();
 
-					} );
+					new OBJLoader(manager)
+						.setMaterials(materials)
+						.setPath('cat/')
+						.load('0.obj', function (object) {
+							object.scale.set(.2, .2, .2);
+							object.position.y = - 80;
+							scene.add(object);
+							phoenix = object;
+						}, onProgress, onError);
 
-				//
-
-				renderer = new THREE.WebGLRenderer();
-				renderer.setPixelRatio( window.devicePixelRatio );
-				renderer.setSize( window.innerWidth, window.innerHeight );
-				container.appendChild( renderer.domElement );
-
-				document.addEventListener( 'mousemove', onDocumentMouseMove, false );
-
-				//
-
-				window.addEventListener( 'resize', onWindowResize, false );
-
-			}
-
-			function onWindowResize() {
-
-				windowHalfX = window.innerWidth / 2;
-				windowHalfY = window.innerHeight / 2;
-
-				camera.aspect = window.innerWidth / window.innerHeight;
-				camera.updateProjectionMatrix();
-
-				renderer.setSize( window.innerWidth, window.innerHeight );
-
-			}
-
-			function onDocumentMouseMove( event ) {
-
-				mouseX = ( event.clientX - windowHalfX ) / 2;
-				mouseY = ( event.clientY - windowHalfY ) / 2;
-
-			}
+				});
 
 			//
 
-			function animate() {
+			renderer = new THREE.WebGLRenderer();
+			renderer.setPixelRatio(window.devicePixelRatio);
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			container.appendChild(renderer.domElement);
 
-				requestAnimationFrame( animate );
-				render();
+			// document.addEventListener('mousemove', onDocumentMouseMove, false);
 
-			}
+			//
 
-			function render() {
+			window.addEventListener('resize', onWindowResize, false);
 
-				camera.position.x += ( mouseX - camera.position.x ) * .05;
-				camera.position.y += ( - mouseY - camera.position.y ) * .05;
+			createControls(camera);
 
-				camera.lookAt( scene.position );
+			//render();
+		}
 
-				renderer.render( scene, camera );
+		function createControls(camera) {
 
-			}
+			controls = new TrackballControls(camera, renderer.domElement);
 
-		</script>
+			controls.rotateSpeed = 1.0;
+			controls.zoomSpeed = 1.2;
+			controls.panSpeed = 0.8;
 
-	</body>
+			controls.staticMoving = true;
+			controls.dynamicDampingFactor = 0.3;
+
+			controls.keys = [65, 83, 68];
+
+			controls.addEventListener('change', render);
+
+		}
+
+		function onWindowResize() {
+
+			windowHalfX = window.innerWidth / 2;
+			windowHalfY = window.innerHeight / 2;
+
+			camera.aspect = window.innerWidth / window.innerHeight;
+			camera.updateProjectionMatrix();
+
+			renderer.setSize(window.innerWidth, window.innerHeight);
+
+		}
+
+		// function onDocumentMouseMove(event) {
+
+		// 	mouseX = (event.clientX - windowHalfX) / 2;
+		// 	mouseY = (event.clientY - windowHalfY) / 2;
+
+		// }
+
+		//
+
+		function animate() {
+
+			requestAnimationFrame(animate);
+			controls.update();
+			render();
+
+		}
+
+		function render() {
+
+			// camera.position.x += (mouseX - camera.position.x) * .05;
+			// camera.position.y += (- mouseY - camera.position.y) * .05;
+			// // phoenix.position.x += 1;
+			// camera.lookAt(scene.position);
+
+			renderer.render(scene, camera);
+
+		}
+
+	</script>
+
+</body>
+
 </html>
