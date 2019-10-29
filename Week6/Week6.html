@@ -6,21 +6,6 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	<link type="text/css" rel="stylesheet" href="main.css">
-
-	<script id="vertex-shader" type="x-shader/x-vertex">
-			attribute vec4 vPosition;
-			attribute vec3 vColor;
-			uniform vec4 translation; // 用于平移
-			varying vec4 color;
-	
-			void main()
-			{
-				gl_Position = vPosition + translation;
-				color = vec4(vColor, 1.0);
-				gl_PointSize = 1.0;
-			}
-		</script>
-
 </head>
 
 <!-- 将动物拓展为三维物体（建议由STL、OBJ等模型导入）。
@@ -33,7 +18,13 @@
 	<!-- <div id="info">
 		<a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> - OBJLoader + MTLLoader
 		</div> -->
-
+		<button id="rotatexButton">rotatex</button>
+		<button id="rotateyButton">rotatey</button>
+		<button id="rotatezButton">rotatez</button>
+		<button id="rotatecxButton">rotatecx</button>
+		<button id="rotatecyButton">rotatecy</button>
+		<button id="rotateczButton">rotatecz</button>
+	
 	<script type="module">
 
 		import * as THREE from '../threejs/three.module.js';
@@ -44,17 +35,16 @@
 		import { TrackballControls } from '../threejs/TrackballControls.js';
 		var container;
 
-		var camera, controls, scene, renderer;
-		var phoenix;
+		var camera, controls, scene, renderer, phoenix;
 
 		var mouseX = 0, mouseY = 0;
 
 		var windowHalfX = window.innerWidth / 2;
 		var windowHalfY = window.innerHeight / 2;
+		var cx = 0, cy = 0, cz = 0, px = 0, py = 0, pz = 0, rx = 0, ry = 0, rz = 0, rcx = 0, rcy = 0, rcz = 0;
 
 
 		init();
-		animate();
 
 
 		function init() {
@@ -113,6 +103,7 @@
 							object.position.y = - 80;
 							scene.add(object);
 							phoenix = object;
+							animate();
 						}, onProgress, onError);
 
 				});
@@ -171,6 +162,88 @@
 
 		// }
 
+		document.getElementById("rotatexButton").onclick = function () {
+			if (rx === 0)
+				rx = 0.1;
+			else
+				rx = 0;
+		};
+		document.getElementById("rotateyButton").onclick = function () {
+			if (ry === 0)
+				ry = 0.1;
+			else
+				ry = 0;
+		};
+		document.getElementById("rotatezButton").onclick = function () {
+			if (rz === 0)
+				rz = 0.1;
+			else
+				rz = 0;
+		};
+		document.getElementById("rotatecxButton").onclick = function () {
+			if (rcx === 0)
+				rcx = 0.1;
+			else
+				rcx = 0;
+		};
+		document.getElementById("rotatecyButton").onclick = function () {
+			if (rcy === 0)
+				rcy = 0.1;
+			else
+				rcy = 0;
+		};
+		document.getElementById("rotateczButton").onclick = function () {
+			if (rcz === 0)
+				rcz = 0.1;
+			else
+				rcz = 0;
+		};
+
+
+		window.addEventListener("keydown", function () {
+			switch (event.keycode) {
+				case 65://A
+					cz -= 1;
+					break;
+				case 81://Q
+					cz += 1;
+					break;
+				case 87://W
+					cy -= 1;
+					break;
+				case 83://S
+					cy += 1;
+					break;
+				case 69://E
+					cx -= 1;
+					break;
+				case 68://D
+					cx += 1;
+					break;
+				case 85://U
+					pz += 1;
+					break;
+				case 74://J
+					pz -= 1;
+					break;
+				case 73://I
+					py += 1;
+					break;
+				case 75://K
+					py -= 1;
+					break;
+				case 48://O
+					px += 1;
+					break;
+				case 76://L
+					px -= 1;
+					break;
+				default: break;
+			}
+			render();
+		});
+
+
 		//
 
 		function animate() {
@@ -187,6 +260,21 @@
 			// camera.position.y += (- mouseY - camera.position.y) * .05;
 			// // phoenix.position.x += 1;
 			// camera.lookAt(scene.position);
+			camera.position.x += cx;
+			camera.position.y += cy;
+			camera.position.z += cz;
+			camera.rotation.x += rcx;
+			camera.rotation.y += rcy;
+			camera.rotation.z += rcz;
+			phoenix.position.x += px;
+			phoenix.position.y += py;
+			phoenix.position.z += pz;
+			phoenix.rotation.x += rx;
+			phoenix.rotation.y += ry;
+			phoenix.rotation.z += rz;
+
+			camera.lookAt(scene.position);
+
 
 			renderer.render(scene, camera);
 
