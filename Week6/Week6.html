@@ -2,7 +2,7 @@
 <html lang="en">
 
 <head>
-	<title>three.js webgl - OBJLoader + MTLLoader</title>
+	<title>Week 6 Attempt</title>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
 	<link type="text/css" rel="stylesheet" href="main.css">
@@ -18,13 +18,13 @@
 	<!-- <div id="info">
 		<a href="http://threejs.org" target="_blank" rel="noopener">three.js</a> - OBJLoader + MTLLoader
 		</div> -->
-		<button id="rotatexButton">rotatex</button>
-		<button id="rotateyButton">rotatey</button>
-		<button id="rotatezButton">rotatez</button>
-		<button id="rotatecxButton">rotatecx</button>
-		<button id="rotatecyButton">rotatecy</button>
-		<button id="rotateczButton">rotatecz</button>
-	
+	<button id="rotatexButton">rotatex</button>
+	<button id="rotateyButton">rotatey</button>
+	<button id="rotatezButton">rotatez</button>
+	<button id="rotatecxButton">rotatecx</button>
+	<button id="rotatecyButton">rotatecy</button>
+	<button id="rotateczButton">rotatecz</button>
+
 	<script type="module">
 
 		import * as THREE from '../threejs/three.module.js';
@@ -90,14 +90,14 @@
 			// manager.addHandler( /\.tga$/i, new TGALoader() );
 
 			new MTLLoader(manager)
-				.setPath('cat/')
+				.setPath('model/')
 				.load('0.mtl', function (materials) {
 
 					materials.preload();
 
 					new OBJLoader(manager)
 						.setMaterials(materials)
-						.setPath('cat/')
+						.setPath('model/')
 						.load('0.obj', function (object) {
 							object.scale.set(.2, .2, .2);
 							object.position.y = - 80;
@@ -200,48 +200,48 @@
 		};
 
 
-		window.addEventListener("keydown", function () {
-			switch (event.keycode) {
-				case 65://A
-					cz -= 1;
-					break;
-				case 81://Q
-					cz += 1;
-					break;
-				case 87://W
-					cy -= 1;
-					break;
-				case 83://S
-					cy += 1;
-					break;
-				case 69://E
-					cx -= 1;
-					break;
-				case 68://D
-					cx += 1;
-					break;
-				case 85://U
-					pz += 1;
-					break;
-				case 74://J
-					pz -= 1;
-					break;
-				case 73://I
-					py += 1;
-					break;
-				case 75://K
-					py -= 1;
-					break;
-				case 48://O
-					px += 1;
-					break;
-				case 76://L
-					px -= 1;
-					break;
-				default: break;
-			}
-			render();
-		});
+		document.addEventListener("keydown", function () {
+				switch (event.keyCode) {
+					case 65://A
+						cz -= 1;
+						break;
+					case 81://Q
+						cz += 1;
+						break;
+					case 87://W
+						cy -= 1;
+						break;
+					case 83://S
+						cy += 1;
+						break;
+					case 69://E
+						cx -= 1;
+						break;
+					case 68://D
+						cx += 1;
+						break;
+					case 85://U
+						pz += 1;
+						break;
+					case 74://J
+						pz -= 1;
+						break;
+					case 73://I
+						py += 1;
+						break;
+					case 75://K
+						py -= 1;
+						break;
+					case 48://O
+						px += 1;
+						break;
+					case 76://L
+						px -= 1;
+						break;
+					default: break;
+				}
+				render();
+			});
 
 
 		//
@@ -277,7 +277,7 @@
 
 
 			renderer.render(scene, camera);
-
+			
 		}
 
 	</script>
