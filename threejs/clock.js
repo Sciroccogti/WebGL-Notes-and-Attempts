@@ -1,14 +1,13 @@
 var canvas;
-function clock()
-{
+function clock() {
 	canvas = document.createElement('canvas');
-	canvas.width=200;
-	canvas.height=200;
+	canvas.width = 200;
+	canvas.height = 200;
 	var ctx = canvas.getContext('2d');
-	if(ctx){
+	if (ctx) {
 		var timerId;
 		var frameRate = 60;
-		function canvObject(){
+		function canvObject() {
 			this.x = 0;
 			this.y = 0;
 			this.rotation = 0;
@@ -16,36 +15,36 @@ function clock()
 			this.borderColor = '#000000';
 			this.fill = false;
 			this.fillColor = '#ff0000';
-			this.update = function(){
-			if(!this.ctx)throw new Error('你没有指定ctx对象。');
-			var ctx = this.ctx
-			ctx.save();
-			ctx.lineWidth = this.borderWidth;
-			ctx.strokeStyle = this.borderColor;
-			ctx.fillStyle = this.fillColor;
-			ctx.translate(this.x, this.y);
-			if(this.rotation)ctx.rotate(this.rotation * Math.PI/180);
-			if(this.draw)this.draw(ctx);
-			if(this.fill)ctx.fill();
-			ctx.stroke();
-			ctx.restore();
+			this.update = function () {
+				if (!this.ctx) throw new Error('你没有指定ctx对象。');
+				var ctx = this.ctx
+				ctx.save();
+				ctx.lineWidth = this.borderWidth;
+				ctx.strokeStyle = this.borderColor;
+				ctx.fillStyle = this.fillColor;
+				ctx.translate(this.x, this.y);
+				if (this.rotation) ctx.rotate(this.rotation * Math.PI / 180);
+				if (this.draw) this.draw(ctx);
+				if (this.fill) ctx.fill();
+				ctx.stroke();
+				ctx.restore();
 			}
 		};
-		function Line(){};
-			Line.prototype = new canvObject();
-			Line.prototype.fill = false;
-			Line.prototype.start = [0,0];
-			Line.prototype.end = [5,5];
-			Line.prototype.draw = function(ctx){
+		function Line() { };
+		Line.prototype = new canvObject();
+		Line.prototype.fill = false;
+		Line.prototype.start = [0, 0];
+		Line.prototype.end = [5, 5];
+		Line.prototype.draw = function (ctx) {
 			ctx.beginPath();
-			ctx.moveTo.apply(ctx,this.start);
-			ctx.lineTo.apply(ctx,this.end);
+			ctx.moveTo.apply(ctx, this.start);
+			ctx.lineTo.apply(ctx, this.end);
 			ctx.closePath();
 		};
 
-		function Circle(){};
-			Circle.prototype = new canvObject();
-			Circle.prototype.draw = function(ctx){
+		function Circle() { };
+		Circle.prototype = new canvObject();
+		Circle.prototype.draw = function (ctx) {
 			ctx.beginPath();
 			ctx.arc(0, 0, this.radius, 0, 2 * Math.PI, true);
 			ctx.closePath();
@@ -67,8 +66,8 @@ function clock()
 		hour.borderColor = "#000000";
 		hour.borderWidth = 10;
 		hour.rotation = 0;
-		hour.start = [0,20];
-		hour.end = [0,-50];
+		hour.start = [0, 20];
+		hour.end = [0, -50];
 
 		var minute = new Line();
 		minute.ctx = ctx;
@@ -77,8 +76,8 @@ function clock()
 		minute.borderColor = "#333333";
 		minute.borderWidth = 7;
 		minute.rotation = 0;
-		minute.start = [0,20];
-		minute.end = [0,-70];
+		minute.start = [0, 20];
+		minute.end = [0, -70];
 
 		var seconds = new Line();
 		seconds.ctx = ctx;
@@ -87,9 +86,9 @@ function clock()
 		seconds.borderColor = "#ff0000";
 		seconds.borderWidth = 4;
 		seconds.rotation = 0;
-		seconds.start = [0,20];
-		seconds.end = [0,-80];
-
+		seconds.start = [0, 20];
+		seconds.end = [0, -80];
+		// 中心转轴
 		var center = new Circle();
 		center.ctx = ctx;
 		center.x = 100;
@@ -98,7 +97,7 @@ function clock()
 		center.fill = true;
 		center.borderColor = 'orange';
 
-		for(var i=0,ls=[],cache;i<12;i++){
+		for (var i = 0, ls = [], cache; i < 12; i++) {
 			cache = ls[i] = new Line();
 			cache.ctx = ctx;
 			cache.x = 100;
@@ -106,20 +105,24 @@ function clock()
 			cache.borderColor = "orange";
 			cache.borderWidth = 2;
 			cache.rotation = i * 30;
-			cache.start = [0,-70];
-			cache.end = [0,-80];
+			cache.start = [0, -70];
+			cache.end = [0, -80];
 		}
 
-		timerId = setInterval(function(){
+		timerId = setInterval(function () {
 			// 清除画布
-			ctx.clearRect(0,0,200,200);
+			ctx.clearRect(0, 0, 200, 200);
 			// 填充背景色
-			ctx.fillStyle = 'orange';
-			ctx.fillRect(0,0,200,200);
+			// var my_gradient = ctx.createLinearGradient(0, 0, 0, 170);
+			// my_gradient.addColorStop(0, "black");
+			// my_gradient.addColorStop(1, "#708090");
+			ctx.fillStyle = "#696969";
+			// ctx.fillStyle = 'orange';
+			ctx.fillRect(0, 0, 200, 200);
 			// 表盘
 			circle.update();
 			// 刻度
-			for(var i=0;cache=ls[i++];)cache.update();
+			for (var i = 0; cache = ls[i++];)cache.update();
 			// 时针
 			hour.rotation = (new Date()).getHours() * 30;
 			hour.update();
@@ -131,8 +134,8 @@ function clock()
 			seconds.update();
 			// 中心圆
 			center.update();
-		},(1000/frameRate)|0);
-	}else{
-	alert('您的浏览器不支持Canvas无法预览.\n跟我一起说："Fuck Internet Exploer!"');
+		}, (1000 / frameRate) | 0);
+	} else {
+		alert('您的浏览器不支持Canvas无法预览.\n跟我一起说："Fuck Internet Exploer!"');
 	}
 }
