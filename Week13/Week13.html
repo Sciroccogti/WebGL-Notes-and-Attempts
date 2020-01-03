@@ -25,11 +25,15 @@
             color: '#ffffff',
             scale: 4,
             flowX: 1,
-            flowY: 1
+            flowY: 1,
+            positionX: 0,
+            positionY: 0,
+            positionZ: 0,
+            intensity: 1
+
         };
 
         init();
-        animate();
 
         function init() {
 
@@ -39,7 +43,26 @@
             clock = new THREE.Clock();
 
             scene = new THREE.Scene();
-            scene.background = new THREE.Color(0x000000);
+            scene.background = new THREE.Color(0x003300);
+
+            // var geometry = new THREE.CubeGeometry(100, 100, 100, 4, 4);
+            // var material = new THREE.MeshLambertMaterial({ color: 0x00ff00 });
+            // var mesh = new THREE.Mesh(geometry, material);
+            // mesh.position.set(0, 0, 0);
+            // scene.add(mesh);
+
+            var geometry2 = new THREE.CubeGeometry(20, 20, 20, 4, 4);
+            var material2 = new THREE.MeshLambertMaterial({ color: 0xff0000 });
+            var mesh2 = new THREE.Mesh(geometry2, material2);
+            mesh2.position.set(0, 0, 0);
+            scene.add(mesh2);
+
+            var geometry = new THREE.CubeGeometry(300,100,300,4,4);
+            var material = new THREE.MeshLambertMaterial({color:0xffffff});
+            var mesh3 = new THREE.Mesh(geometry,material);
+            mesh3.position.set(0,-50,0);
+            scene.add(mesh3);
+
 
             // grass
             var geometry = new THREE.PlaneBufferGeometry(300, 300); // 平面几何体，width，height
@@ -47,7 +70,7 @@
             var texture = new THREE.CanvasTexture(generateTexture());
 
             for (var i = 0; i < 15; i++) {
-                var material = new THREE.MeshBasicMaterial({
+               var material = new THREE.MeshBasicMaterial({
                     // 亮度渐变
                     color: new THREE.Color().setHSL(0.3, 0.75, (i / 15) * 0.4 + 0.1),
                     map: texture,
@@ -84,19 +107,27 @@
             water.rotation.z = Math.PI / 6;
             scene.add(water);
 
+            //light
+                      var ambientLight = new THREE.AmbientLight(0xffffff,0.4);
+                        scene.add(ambientLight);
+
+            var PPointLight = new THREE.PointLight(0xff0000, 1, 400, 1);
+            PPointLight.position.set(0, 0, 0);
+            scene.add(PPointLight);
+
             // skybox
+/*
+             var cubeTextureLoader = new THREE.CubeTextureLoader();
+             cubeTextureLoader.setPath('Park2/');
 
-            // var cubeTextureLoader = new THREE.CubeTextureLoader();
-            // cubeTextureLoader.setPath('Park2/');
+             var cubeTexture = cubeTextureLoader.load([
+                 "posx.jpg", "negx.jpg",
+                 "posy.jpg", "negy.jpg",
+                 "posz.jpg", "negz.jpg"
+             ]);
 
-            // var cubeTexture = cubeTextureLoader.load([
-            //     "posx.jpg", "negx.jpg",
-            //     "posy.jpg", "negy.jpg",
-            //     "posz.jpg", "negz.jpg"
-            // ]);
-
-            // scene.background = cubeTexture;
-
+             scene.background = cubeTexture;
+*/
             // renderer
 
             renderer = new THREE.WebGLRenderer({ antialias: true });
@@ -106,8 +137,28 @@
 
             // dat.gui
 
-            // var gui = new GUI();
+            var gui = new GUI();
 
+            gui.addColor(params, 'color').onChange(function (value) {
+
+                PPointLight.color.set(value);
+
+            });
+            gui.add(params, 'positionX', -300, 300).onChange(function (value) {
+                PPointLight.position.x = value;
+                mesh2.position.x = value;
+            });
+            gui.add(params, 'positionY', -300, 300).onChange(function (value) {
+                PPointLight.position.y = value;
+                mesh2.position.y = value;
+            });
+            gui.add(params, 'positionZ', -300, 300).onChange(function (value) {
+                PPointLight.position.z = value;
+                mesh2.position.z = value;
+            });
+            gui.add(params, 'intensity', 0, 10).step(0.1).onChange(function (value) {
+                PPointLight.intensity = value;
+            });
             // gui.addColor(params, 'color').onChange(function (value) {
 
             //     water.material.uniforms['color'].value.set(value);
@@ -130,12 +181,13 @@
             //     water.material.uniforms['flowDirection'].value.normalize();
 
             // });
-
-            // gui.open();
+            gui.open();
 
             //
             var controls = new OrbitControls(camera, renderer.domElement);
             window.addEventListener('resize', onWindowResize, false);
+
+            animate();
 
         }
 
@@ -191,13 +243,13 @@
 
             // camera.lookAt(scene.position);
 
-            for (var i = 0, l = scene.children.length; i < l; i++) {
+            // for (var i = 0, l = scene.children.length; i < l; i++) {
 
-                var mesh = scene.children[i];
-                mesh.position.x = Math.sin(time * 4) * i * i * 0.005;
-                mesh.position.z = Math.cos(time * 6) * i * i * 0.005;
+            //     var mesh = scene.children[i];
+            //     mesh.position.x = Math.sin(time * 4) * i * i * 0.005;
+            //     mesh.position.z = Math.cos(time * 6) * i * i * 0.005;
 
-            }
+            // }
 
             renderer.render(scene, camera);
 
